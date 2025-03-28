@@ -165,7 +165,7 @@ def launch_setup(context, *args, **kwargs):
             '-x', '-0.2',
             '-y', '-0.54' if robot_type.perform(context) == 'uf850' else '-0.5',
             '-z', '1.021',
-            '-Y', '1.571',
+            '-Y', '-1.571',
         ],
         parameters=[{'use_sim_time': True}],
     )
