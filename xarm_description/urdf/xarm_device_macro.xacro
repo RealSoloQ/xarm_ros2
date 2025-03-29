@@ -41,9 +41,8 @@
     robot_sn:='' 
     mesh_suffix:='stl' 
     kinematics_suffix:=''
-    "
-    > 
-
+    ">
+  
     <!-- Load Common Material -->
     <xacro:include filename="$(find xarm_description)/urdf/_private_macro.xacro" />
     <xacro:device_macro_begin />
@@ -212,7 +211,7 @@
     </xacro:unless>
 
     <xacro:if value="${add_realsense_d435i}">
-      <!-- (xarm) Load RealSense D435i URDF -->
+      <!-- Load RealSense D435i URDF -->
       <xacro:include filename="$(find xarm_description)/urdf/camera/realsense_d435i.urdf.xacro" />
       <xacro:d435i_urdf prefix="${prefix}" add_d435i_links="${add_d435i_links}" />
       <xacro:if value="${add_d435i_links}">
@@ -265,22 +264,11 @@
       </xacro:unless>
     </xacro:if>
 
-    <xacro:if value="${not add_gripper and not add_vacuum_gripper and add_other_geometry}">
-      <!-- Load Other Model URDF -->
-      <xacro:include filename="$(find xarm_description)/urdf/other/other_geometry.urdf.xacro" />
-      <xacro:other_geometry prefix="${prefix}" attach_to="${prefix}link_eef"
-        geometry_type="${geometry_type}" geometry_mass="${geometry_mass}" 
-        geometry_height="${geometry_height}" geometry_radius="${geometry_radius}"
-        geometry_length="${geometry_length}" geometry_width="${geometry_width}"
-        geometry_mesh_filename="${geometry_mesh_filename}" 
-        geometry_mesh_origin_xyz="${geometry_mesh_origin_xyz}" geometry_mesh_origin_rpy="${geometry_mesh_origin_rpy}"
-        geometry_mesh_tcp_xyz="${geometry_mesh_tcp_xyz}" geometry_mesh_tcp_rpy="${geometry_mesh_tcp_rpy}"
-      />
-    </xacro:if>
-
-    <!-- gazebo_plugin -->
+    <!-- gazebo_plugin block -->
     <xacro:if value="${load_gazebo_plugin}">
+      <!-- Include common gazebo macros -->
       <xacro:include filename="$(find xarm_description)/urdf/common/common.gazebo.xacro" />
+      <!-- Define new_ros2_control_params if in ROS2 -->
       <xacro:if value="${is_ros2}">
         <xacro:if value="${robot_type == 'uf850' or robot_type == 'xarm7_mirror'}">
           <xacro:property name="new_ros2_control_params" value="$(find xarm_controller)/config/${robot_type}_controllers.yaml"/>
@@ -291,16 +279,17 @@
         <xacro:if value="${ros2_control_params != ''}">
           <xacro:property name="new_ros2_control_params" value="${ros2_control_params}"/>
         </xacro:if>
-        <xacro:if value="${ros2_control_plugin == 'ign_ros2_control/IgnitionSystem'}">
-          <xacro:ignition_ros2_control_plugin prefix="${prefix}" ros2_control_params="${new_ros2_control_params}"/>
-        </xacro:if>
-        <xacro:unless value="${ros2_control_plugin == 'ign_ros2_control/IgnitionSystem'}">
-          <xacro:gazebo_ros2_control_plugin ros2_control_params="${new_ros2_control_params}"/>
-        </xacro:unless>
       </xacro:if>
-      <xacro:unless value="${is_ros2}">
-        <xacro:gazebo_ros1_control_plugin namespace="${hw_ns}"/>
-      </xacro:unless>    
+      <!-- Use composite macro to load control plugin and grasp fix plugin once -->
+      <xacro:gazebo_plugins 
+        ros2_control_params="${new_ros2_control_params}"
+        prefix="${prefix}"
+        control_plugin_type="ros2"
+        arm_name="xarm7" 
+        palm_link1="left_inner_knuckle" 
+        palm_link2="right_inner_knuckle"
+        gripper_link1="left_finger" 
+        gripper_link2="right_finger"/>    
     </xacro:if>
 
     <xacro:if value="${use_gazebo_camera}">
@@ -312,3 +301,4 @@
 
   </xacro:macro>
 </robot>
+

@@ -1,21 +1,21 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://ros.org/wiki/xacro">
 
+  <!-- ROS2 Control Plugin for Ignition -->
   <xacro:macro name="ignition_ros2_control_plugin" params="prefix:='' ros2_control_params:=''">
-
     <gazebo>
       <plugin filename="libign_ros2_control-system.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
         <xacro:if value="${ros2_control_params != ''}">
           <parameters>${ros2_control_params}</parameters>
         </xacro:if>
+        <!-- Optionally specify a controller manager node name -->
         <!-- <controller_manager_node_name>${prefix}controller_manager</controller_manager_node_name> -->
       </plugin>
     </gazebo>
-
   </xacro:macro>
 
+  <!-- ROS2 Control Plugin -->
   <xacro:macro name="gazebo_ros2_control_plugin" params="ros2_control_params:=''">
-
     <gazebo>
       <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
         <robot_sim_type>gazebo_ros2_control/GazeboSystem</robot_sim_type>
@@ -24,21 +24,57 @@
         </xacro:if>
       </plugin>
     </gazebo>
-
   </xacro:macro>
 
+  <!-- ROS1 Control Plugin -->
   <xacro:macro name="gazebo_ros1_control_plugin" params="namespace:=''">
-
     <gazebo>
       <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
         <robotNamespace>/${namespace}</robotNamespace>
         <!-- <controlPeriod>0.0001</controlPeriod> -->
         <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
-		    <legacyModeNS>true</legacyModeNS>
+        <legacyModeNS>true</legacyModeNS>
         <!-- <preserveWorldVelocity>true</preserveWorldVelocity> -->
       </plugin>
     </gazebo>
+  </xacro:macro>
 
+  <!-- Grasp Fix Plugin Macro -->
+  <xacro:macro name="gazebo_grasp_fix_plugin" params="arm_name:='', palm_link1:='', palm_link2:='', gripper_link1:='', gripper_link2:=''">
+    <gazebo>
+      <plugin name="gazebo_grasp_fix" filename="libgazebo_grasp_fix.so">
+        <arm>
+          <arm_name>${arm_name}</arm_name>
+          <palm_link>${palm_link1}</palm_link>
+          <palm_link>${palm_link2}</palm_link>
+          <gripper_link>${gripper_link1}</gripper_link>
+          <gripper_link>${gripper_link2}</gripper_link>
+        </arm>
+        <forces_angle_tolerance>100</forces_angle_tolerance>
+        <update_rate>4</update_rate>
+        <grip_count_threshold>4</grip_count_threshold>
+        <max_grip_count>8</max_grip_count>
+        <release_tolerance>0.005</release_tolerance>
+        <disable_collisions_on_attach>false</disable_collisions_on_attach>
+        <contact_topic>__default_topic__</contact_topic>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Composite Macro: Loads one control plugin (based on a parameter) and then the grasp fix plugin -->
+  <xacro:macro name="gazebo_plugins" params="ros2_control_params:='', prefix:='', control_plugin_type:='ros2', arm_name:='', palm_link1:='', palm_link2:='' gripper_link1:='', gripper_link2:=''">
+    <xacro:if value="${control_plugin_type == 'ignition'}">
+      <xacro:ignition_ros2_control_plugin prefix="${prefix}" ros2_control_params="${ros2_control_params}"/>
+    </xacro:if>
+    <xacro:if value="${control_plugin_type == 'ros2'}">
+      <xacro:gazebo_ros2_control_plugin ros2_control_params="${ros2_control_params}"/>
+    </xacro:if>
+    <xacro:if value="${control_plugin_type == 'ros1'}">
+      <xacro:gazebo_ros1_control_plugin namespace="${prefix}"/>
+    </xacro:if>
+    <!-- Load the grasp fix plugin -->
+    <xacro:gazebo_grasp_fix_plugin arm_name="${arm_name}" palm_link1="${palm_link1}" palm_link2="${palm_link2}" gripper_link1="${gripper_link1}" gripper_link2="${gripper_link2}"/>
   </xacro:macro>
 
 </robot>
+
