@@ -50,11 +50,11 @@
           <gripper_link>${gripper_link1}</gripper_link>
           <gripper_link>${gripper_link2}</gripper_link>
         </arm>
-        <forces_angle_tolerance>100</forces_angle_tolerance>
-        <update_rate>4</update_rate>
-        <grip_count_threshold>4</grip_count_threshold>
-        <max_grip_count>8</max_grip_count>
-        <release_tolerance>0.005</release_tolerance>
+        <forces_angle_tolerance>160</forces_angle_tolerance>
+        <update_rate>20</update_rate>
+        <grip_count_threshold>2</grip_count_threshold>
+        <max_grip_count>12</max_grip_count>
+        <release_tolerance>0.01</release_tolerance>
         <disable_collisions_on_attach>false</disable_collisions_on_attach>
         <contact_topic>__default_topic__</contact_topic>
       </plugin>
@@ -62,7 +62,7 @@
   </xacro:macro>
 
   <!-- Composite Macro: Loads one control plugin (based on a parameter) and then the grasp fix plugin -->
-  <xacro:macro name="gazebo_plugins" params="ros2_control_params:='', prefix:='', control_plugin_type:='ros2', arm_name:='', palm_link1:='', palm_link2:='' gripper_link1:='', gripper_link2:=''">
+  <xacro:macro name="gazebo_plugins" params="ros2_control_params:='', prefix:='', control_plugin_type:='ros2', arm_name:='', palm_link1:='', palm_link2:='', gripper_link1:='', gripper_link2:=''">
     <xacro:if value="${control_plugin_type == 'ignition'}">
       <xacro:ignition_ros2_control_plugin prefix="${prefix}" ros2_control_params="${ros2_control_params}"/>
     </xacro:if>

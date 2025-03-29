@@ -286,8 +286,8 @@
         prefix="${prefix}"
         control_plugin_type="ros2"
         arm_name="xarm7" 
-        palm_link1="left_inner_knuckle" 
-        palm_link2="right_inner_knuckle"
+        palm_link1="left_inner_knuckle"
+        palm_link2="right_inner_knuckle" 
         gripper_link1="left_finger" 
         gripper_link2="right_finger"/>    
     </xacro:if>
