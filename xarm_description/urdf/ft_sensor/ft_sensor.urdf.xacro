@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://ros.org/wiki/xacro" name="ft_sensor">
+  <xacro:macro name="ft_sensor_urdf" params="prefix:='' attach_to:=link7
+                                            xyz:='0 0 0' rpy:='0 0 0'">
+
+    <joint name="${prefix}ft_sensor_fix" type="fixed">
+      <parent link="${attach_to}"/>
+      <child  link="${prefix}ft_sensor_link"/>
+      <!-- centre of sensor -->
+      <origin xyz="0 0 0.029" rpy="${rpy}"/>
+    </joint>
+
+    <link name="${prefix}ft_sensor_link">
+      <!-- keep inertial small; update if you have real CAD -->
+      <inertial>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <mass value="0.28"/>
+        <inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+                 ixy="0" ixz="0" iyz="0"/>
+      </inertial>
+
+      <!-- optional visual/collision -->
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.035" length="0.058"/></geometry>
+        <material name="Silver"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.035" length="0.058"/></geometry>
+      </collision>
+    </link>
+    
+    <joint name="${prefix}ft_sensor_to_eef" type="fixed">
+      <parent link="${prefix}ft_sensor_link"/>
+      <child  link="${prefix}link_eef"/>
+      <origin xyz="0 0 0.029" rpy="0 0 0"/>  <!-- the other half -->
+    </joint>
+    
+    
+  </xacro:macro>
+</robot>
+

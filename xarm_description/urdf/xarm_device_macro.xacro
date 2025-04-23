@@ -7,6 +7,7 @@
     effort_control:=false 
     velocity_control:=false
     add_gripper:=false
+    add_ft_sensor:=true
     add_vacuum_gripper:=false
     add_bio_gripper:=false
     dof:=7
@@ -42,7 +43,15 @@
     mesh_suffix:='stl' 
     kinematics_suffix:=''
     ">
-  
+  	
+    <!-- Add ft sensor -->
+    <xacro:if value="${add_ft_sensor}">
+      <xacro:property name="gripper_parent" value="${prefix}ft_sensor_link"/>
+    </xacro:if>
+    <xacro:unless value="${add_ft_sensor}">
+      <xacro:property name="gripper_parent" value="${prefix}link_eef"/>
+    </xacro:unless>
+
     <!-- Load Common Material -->
     <xacro:include filename="$(find xarm_description)/urdf/_private_macro.xacro" />
     <xacro:device_macro_begin />
@@ -111,6 +120,7 @@
         velocity_control="${velocity_control}" 
         ros2_control_plugin="${ros2_control_plugin}" 
         add_gripper="${add_gripper}"
+        add_ft_sensor="${add_ft_sensor}"
         add_bio_gripper="${add_bio_gripper}"
         robot_ip="${robot_ip}"
         report_type="${report_type}"
@@ -129,6 +139,7 @@
           velocity_control="${velocity_control}" 
           ros2_control_plugin="${ros2_control_plugin}" 
           add_gripper="${add_gripper}"
+          add_ft_sensor="${add_ft_sensor}"
           add_bio_gripper="${add_bio_gripper}"
           robot_ip="${robot_ip}"
           report_type="${report_type}"
@@ -146,6 +157,7 @@
           velocity_control="${velocity_control}" 
           ros2_control_plugin="${ros2_control_plugin}" 
           add_gripper="${add_gripper}"
+          add_ft_sensor="${add_ft_sensor}"
           robot_ip="${robot_ip}"
           report_type="${report_type}"
           baud_checkset="${baud_checkset}"
@@ -162,6 +174,7 @@
           velocity_control="${velocity_control}" 
           ros2_control_plugin="${ros2_control_plugin}" 
           add_gripper="${add_gripper}"
+          add_ft_sensor="${add_ft_sensor}"
           add_bio_gripper="${add_bio_gripper}"
           robot_ip="${robot_ip}"
           report_type="${report_type}"
@@ -181,6 +194,7 @@
           velocity_control="${velocity_control}" 
           ros2_control_plugin="${ros2_control_plugin}"
           add_gripper="${add_gripper}"
+          add_ft_sensor="${add_ft_sensor}"
           add_bio_gripper="${add_bio_gripper}"
           robot_ip="${robot_ip}"
           report_type="${report_type}"
@@ -198,6 +212,7 @@
           velocity_control="${velocity_control}" 
           ros2_control_plugin="${ros2_control_plugin}"
           add_gripper="${add_gripper}"
+          add_ft_sensor="${add_ft_sensor}"
           add_bio_gripper="${add_bio_gripper}"
           robot_ip="${robot_ip}"
           report_type="${report_type}"
@@ -213,7 +228,7 @@
     <xacro:if value="${add_realsense_d435i}">
       <!-- Load RealSense D435i URDF -->
       <xacro:include filename="$(find xarm_description)/urdf/camera/realsense_d435i.urdf.xacro" />
-      <xacro:d435i_urdf prefix="${prefix}" add_d435i_links="${add_d435i_links}" />
+      <xacro:d435i_urdf prefix="${prefix}" add_d435i_links="${add_d435i_links}"/>
       <xacro:if value="${add_d435i_links}">
         <xacro:include filename="$(find xarm_description)/urdf/camera/realsense.gazebo.xacro" />    
         <xacro:realsense_gazebo prefix="${prefix}" />
@@ -222,22 +237,32 @@
     <xacro:unless value="${add_realsense_d435i}">
       <link name="${prefix}link_eef"/>
     </xacro:unless>
-    <joint name="${prefix}joint_eef" type="fixed">
-      <origin xyz="0 0 0" rpy="0 0 0" />
-      <parent link="${prefix}link${dof}" />
-      <child link="${prefix}link_eef" />
-    </joint>
+    
+    <xacro:if value="${add_ft_sensor}">
+      <joint name="${prefix}joint_eef" type="fixed">
+        <origin xyz="0 0 0.029" rpy="0 0 0" />
+        <parent link="${prefix}ft_sensor_link" />
+        <child link="${prefix}link_eef" />
+      </joint>
+    </xacro:if>
+    <xacro:unless value="${add_ft_sensor}">
+      <joint name="${prefix}joint_eef" type="fixed">
+        <origin xyz="0 0 0.029" rpy="0 0 0" />
+        <parent link="${prefix}link${dof}" />
+      	<child link="${prefix}link_eef" />
+      </joint>
+    </xacro:unless>
     
     <xacro:if value="${add_gripper}">
       <xacro:if value="${robot_type == 'lite'}">
         <!-- Load Lite Gripper Model URDF -->
         <xacro:include filename="$(find xarm_description)/urdf/gripper/lite_gripper.urdf.xacro" />
-        <xacro:uflite_gripper_urdf prefix="${prefix}" attach_to="${prefix}link_eef" />
+        <xacro:uflite_gripper_urdf prefix="${prefix}" attach_to="${gripper_parent}" attach_xyz="0 0 0.029" />
       </xacro:if>
       <xacro:unless value="${robot_type == 'lite'}">
         <!-- Load XArm Gripper Model URDF -->
         <xacro:include filename="$(find xarm_description)/urdf/gripper/xarm_gripper_macro.xacro" />
-        <xacro:xarm_gripper_macro prefix="${prefix}" attach_to="${prefix}link_eef" 
+        <xacro:xarm_gripper_macro prefix="${prefix}" attach_to="${gripper_parent}" attach_xyz="0 0 0.029"
           ros2_control_plugin="${ros2_control_plugin}" dof="${dof}" hard_interface="${hard_interface}" />
       </xacro:unless>
     </xacro:if>
@@ -246,7 +271,7 @@
       <xacro:unless value="${robot_type == 'lite'}">
         <!-- Load BIO Gripper Model URDF -->
         <xacro:include filename="$(find xarm_description)/urdf/gripper/bio_gripper_macro.xacro" />
-        <xacro:bio_gripper_macro prefix="${prefix}" attach_to="${prefix}link_eef" 
+        <xacro:bio_gripper_macro prefix="${prefix}" attach_to="${gripper_parent}" attach_xyz="0 0 0.029"
           ros2_control_plugin="${ros2_control_plugin}" dof="${dof}" hard_interface="${hard_interface}" />
       </xacro:unless>
     </xacro:if>
@@ -255,12 +280,12 @@
       <xacro:if value="${robot_type == 'lite'}">
         <!-- Load Lite Vacuum Gripper Model URDF -->
         <xacro:include filename="$(find xarm_description)/urdf/vacuum_gripper/lite_vacuum_gripper.urdf.xacro" />
-        <xacro:uflite_vacuum_gripper_urdf prefix="${prefix}" attach_to="${prefix}link_eef" />
+        <xacro:uflite_vacuum_gripper_urdf prefix="${prefix}" attach_to="${gripper_parent}" attach_xyz="0 0 0.029" />
       </xacro:if>
       <xacro:unless value="${robot_type == 'lite'}">
         <!-- Load XArm Vacuum Gripper Model URDF -->
         <xacro:include filename="$(find xarm_description)/urdf/vacuum_gripper/xarm_vacuum_gripper.urdf.xacro" />
-        <xacro:xarm_vacuum_gripper_urdf prefix="${prefix}" attach_to="${prefix}link_eef" />
+        <xacro:xarm_vacuum_gripper_urdf prefix="${prefix}" attach_to="${gripper_parent}" attach_xyz="0 0 0.029" />
       </xacro:unless>
     </xacro:if>
 

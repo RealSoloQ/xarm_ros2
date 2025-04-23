@@ -41,6 +41,7 @@ def launch_setup(context, *args, **kwargs):
     kinematics_suffix = LaunchConfiguration('kinematics_suffix', default='')
 
     add_gripper = LaunchConfiguration('add_gripper', default=False)
+    add_ft_sensor = LaunchConfiguration('add_ft_sensor', default=True)
     add_vacuum_gripper = LaunchConfiguration('add_vacuum_gripper', default=False)
     add_bio_gripper = LaunchConfiguration('add_bio_gripper', default=False)
     add_realsense_d435i = LaunchConfiguration('add_realsense_d435i', default=False)
@@ -98,6 +99,7 @@ def launch_setup(context, *args, **kwargs):
         ros2_control_plugin=ros2_control_plugin,
         ros2_control_params=ros2_control_params,
         add_gripper=add_gripper,
+        add_ft_sensor=add_ft_sensor,
         add_vacuum_gripper=add_vacuum_gripper,
         add_bio_gripper=add_bio_gripper,
         add_realsense_d435i=add_realsense_d435i,
@@ -122,7 +124,18 @@ def launch_setup(context, *args, **kwargs):
     robot_description_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(PathJoinSubstitution([FindPackageShare('xarm_description'), 'launch', '_robot_description.launch.py'])),
         launch_arguments={
-            'robot_description': yaml.dump(moveit_config.robot_description),
+		'prefix':            prefix,
+		'hw_ns':             hw_ns,
+		'limited':           limited,
+		'effort_control':    effort_control,
+		'velocity_control':  velocity_control,
+		'add_gripper':       add_gripper,
+		'add_ft_sensor':     add_ft_sensor,          
+		'add_bio_gripper':   add_bio_gripper,
+		'add_vacuum_gripper':add_vacuum_gripper,
+		'dof':               dof,
+		'robot_type':        robot_type,
+		'ros2_control_plugin': ros2_control_plugin,
         }.items(),
     )
 
